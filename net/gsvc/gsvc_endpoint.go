@@ -24,19 +24,30 @@ type LocalEndpoint struct {
 
 // NewEndpoint creates and returns an Endpoint from address string of pattern "host:port",
 // eg: "192.168.1.100:80".
+// It panics if the address is invalid.
 func NewEndpoint(address string) Endpoint {
+	endpoint, err := newEndpoint(address)
+	if err != nil {
+		panic(err)
+	}
+	return endpoint
+}
+
+// newEndpoint creates and returns an Endpoint from address string of pattern "host:port",
+// or an error if the address is invalid.
+func newEndpoint(address string) (Endpoint, error) {
 	array := gstr.SplitAndTrim(address, EndpointHostPortDelimiter)
 	if len(array) != 2 {
-		panic(gerror.NewCodef(
+		return nil, gerror.NewCodef(
 			gcode.CodeInvalidParameter,
 			`invalid address "%s" for creating endpoint, endpoint address is like "ip:port"`,
 			address,
-		))
+		)
 	}
 	return &LocalEndpoint{
 		host: array[0],
 		port: gconv.Int(array[1]),
-	}
+	}, nil
 }
 
 // Host returns the IPv4/IPv6 address of a service.
