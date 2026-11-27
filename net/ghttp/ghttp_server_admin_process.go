@@ -222,12 +222,9 @@ func bufferToServerFdMap(buffer []byte) map[string]listenerFdMap {
 	sfm := make(map[string]listenerFdMap)
 	if len(buffer) > 0 {
 		j, _ := gjson.LoadContent(buffer)
-		for k := range j.Var().Map() {
-			m := make(map[string]string)
-			for mapKey, mapValue := range j.Get(k).MapStrStr() {
-				m[mapKey] = mapValue
-			}
-			sfm[k] = m
+		// Read values from the decoded map directly, as j.Get treats "." in server names as a path separator.
+		for k, v := range j.Var().Map() {
+			sfm[k] = gconv.MapStrStr(v)
 		}
 	}
 	return sfm

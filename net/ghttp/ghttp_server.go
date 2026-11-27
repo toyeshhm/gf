@@ -207,7 +207,8 @@ func (s *Server) Start() error {
 	fdMapStr := genv.Get(adminActionReloadEnvKey).String()
 	if len(fdMapStr) > 0 {
 		sfm := bufferToServerFdMap([]byte(fdMapStr))
-		if v, ok := sfm[s.config.Name]; ok {
+		// The fd map is keyed by instance name, see getServerFdMap.
+		if v, ok := sfm[s.instance]; ok {
 			s.startServer(v)
 			reloaded = true
 		}
